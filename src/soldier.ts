@@ -4,7 +4,6 @@ import {
   AnimationMixer,
   Vector3,
   Matrix4,
-  MeshBasicMaterial,
   Raycaster,
   Scene,
   LineBasicMaterial,
@@ -16,7 +15,6 @@ import {
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module.js";
-import TWEEN from "@tweenjs/tween.js";
 import Cell from "./cell";
 
 export default class Soldier {
@@ -74,7 +72,6 @@ export default class Soldier {
     sold.model.traverse(function(object) {
       if (object.isMesh) object.castShadow = true;
     });
-    //
     sold.skeleton = new SkeletonHelper(sold.model);
     sold.skeleton.visible = false;
 
@@ -107,11 +104,12 @@ export default class Soldier {
     this.currentIndex = 1;
     this.followNextTarget();
     this.lastTarget = path[path.length - 1].worldCoords;
-    //highlight path
+    // Path highlight
     path.forEach(cell => {
-      cell.mesh.material = new MeshLambertMaterial({
-        map: ImageUtils.loadTexture("/resources/stone.jpg")
-      });
+      var material: MeshLambertMaterial = <MeshLambertMaterial>(
+        cell.mesh.material
+      );
+      material.color.set(0xffff0d);
     });
   }
 
@@ -135,9 +133,10 @@ export default class Soldier {
     console.log(this.currentPath);
 
     this.currentPath.map(cell => {
-      cell.mesh.material = new MeshLambertMaterial({
-        map: ImageUtils.loadTexture("/resources/grass.png")
-      });
+      var material: MeshLambertMaterial = <MeshLambertMaterial>(
+        cell.mesh.material
+      );
+      material.color.set(0xffffff);
     });
     this.onTargetReached(this);
   }
