@@ -125,13 +125,4 @@ export default class Grid {
     }
     return null;
   }
-
-  clearColors(): void {
-    /* this.cellGrid.forEach(row => 
-            {
-                row.forEach(c => {
-                    c.mesh.material = new MeshLambertMaterial({ map: ImageUtils.loadTexture("/resources/grass.png") })
-                })
-            }) */
-  }
 }

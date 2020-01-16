@@ -3,16 +3,12 @@ import Stats from "three/examples/jsm/libs/stats.module.js";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module.js";
 import {
   Scene,
-  Renderer,
   PerspectiveCamera,
   WebGLRenderer,
-  PlaneGeometry,
-  MeshBasicMaterial,
   Vector3,
   Vector2
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import ModelLoader from "./modelLoader";
 import Grid from "./grid";
 import InputController from "./inputController";
 import Soldier from "./soldier";
@@ -22,17 +18,13 @@ import Pathfinder from "./pathfinder";
 var scene: Scene;
 var renderer: WebGLRenderer;
 var camera: PerspectiveCamera;
-var stats;
-var model, skeleton, mixer, clock;
-var crossFadeControls = [];
-var idleAction, walkAction, runAction;
-var idleWeight, walkWeight, runWeight;
-var actions, settings;
-var singleStepMode = false;
-var sizeOfNextStep = 0;
+var stats: Stats;
+var clock: THREE.Clock;
 var mouse = new THREE.Vector2();
 var inputController: InputController;
 var models: Array<Soldier> = Array();
+var grid: Grid;
+var gridSize: number = 20;
 
 init();
 
@@ -65,15 +57,6 @@ function init() {
   scene.add(dirLight);
   //scene.add( new CameraHelper( light.shadow.camera ) );
   // ground
-  var mesh = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(100, 100),
-    new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false })
-  );
-  mesh.rotation.x = -Math.PI / 2;
-  mesh.receiveShadow = true;
-  scene.add(mesh);
-
-  gridSize = 20;
   addGrid();
 
   var sold = new Soldier();
@@ -82,6 +65,60 @@ function init() {
     scene.add(soldier.skeleton);
     models.push(soldier);
     inputController.initSold(soldier);
+  });
+
+  var sold2 = new Soldier();
+  sold2.init(scene, (soldier: Soldier) => {
+    scene.add(soldier.model);
+    scene.add(soldier.skeleton);
+    models.push(soldier);
+    const soldPos = new Vector2(5, 5);
+    soldier.setPosition(soldPos);
+    soldier.model.translateZ(soldPos.x);
+    soldier.model.translateX(soldPos.y);
+
+    var p = new Pathfinder();
+    var setRandomPath = (tgSold: Soldier) => {
+      var soldGridCoords = grid.toGridCoordsVec3(tgSold.model.position);
+      tgSold.setPath(
+        p.aStar(
+          grid.cellGrid[soldGridCoords.x][soldGridCoords.y],
+          grid.cellGrid[Math.floor(Math.random() * gridSize)][
+            Math.floor(Math.random() * gridSize)
+          ],
+          grid
+        )
+      );
+    };
+    soldier.onTargetReached = setRandomPath;
+    setRandomPath(soldier);
+  });
+
+  var sold3 = new Soldier();
+  sold3.init(scene, (soldier: Soldier) => {
+    scene.add(soldier.model);
+    scene.add(soldier.skeleton);
+    models.push(soldier);
+    const soldPos = new Vector2(-5, -5);
+    soldier.setPosition(soldPos);
+    soldier.model.translateZ(soldPos.x);
+    soldier.model.translateX(soldPos.y);
+
+    var p = new Pathfinder();
+    var setRandomPath = (tgSold: Soldier) => {
+      var soldGridCoords = grid.toGridCoordsVec3(tgSold.model.position);
+      tgSold.setPath(
+        p.aStar(
+          grid.cellGrid[soldGridCoords.x][soldGridCoords.y],
+          grid.cellGrid[Math.floor(Math.random() * gridSize)][
+            Math.floor(Math.random() * gridSize)
+          ],
+          grid
+        )
+      );
+    };
+    soldier.onTargetReached = setRandomPath;
+    setRandomPath(soldier);
   });
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -110,9 +147,6 @@ function addOrbitControl() {
   //controls.minDistance = 1000;
   //controls.maxDistance = 5000;
 }
-
-var grid: Grid;
-var gridSize: number = 20;
 
 function addGrid() {
   grid = new Grid(gridSize, 1);

@@ -10,7 +10,6 @@ import {
   Geometry,
   Line,
   Vector2,
-  ImageUtils,
   MeshLambertMaterial
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
@@ -189,7 +188,7 @@ export default class Soldier {
   }
 
   movementUpdate(deltaTime) {
-    if (this.currentPosition.clone().distanceTo(this.target) < 0.1) {
+    if (this.currentPosition.clone().distanceTo(this.target) < 0.001) {
       //target reached
       if (this.target == this.lastTarget) {
         this.lastTarget = null;
@@ -261,7 +260,7 @@ export default class Soldier {
       if (intersects.length > 0) {
         //TODO prevent debug intersect
         if (intersects[0].object != this.line) {
-          console.log("hit");
+          console.log("Collision Detected!");
           avoidance = ahead.clone().sub(intersects[0].object.position);
           avoidance.normalize();
           avoidance.multiplyScalar(this.maxAvoidance);

@@ -52,8 +52,6 @@ export default class InputController {
     }
   }
 
-  cell1;
-  cell2;
   firstClick = true;
 
   onMouseDown(mouse, camera, event): void {
@@ -71,8 +69,6 @@ export default class InputController {
       this.grid.treeObj.children
     );
     if (intersects.length > 0) {
-      this.grid.clearColors();
-
       var vec2: Vector2 = new Vector2(
         intersects[0].point.x,
         intersects[0].point.z
